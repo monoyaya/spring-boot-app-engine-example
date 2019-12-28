@@ -114,8 +114,8 @@
 			</section>
 
 			<!-- Panel (Spotlight) -->
-			<section class="panel spotlight large" id="third">
-				<div class="content span-7" style="color: black; font-weight: bold;">
+			<section class="panel spotlight medium" id="third">
+				<div class="content span-8" style="color: black; font-weight: bold;">
 					<h2 class="major">After Project ToPle</h2>
 					<p>
 						&ensp;학원 교육기간 중 팀프로젝트로 제작 팀장을 맡았으며, DB와 Server 제작을 담당했다. 교육 당시에는
@@ -130,12 +130,65 @@
 							<a href="https://drive.google.com/open?id=1fABywx8x3MLZlBxBNjATKc682H41rb_v">Google-Drive</a></li>
 					</ul>
 					<ul class="actions">
-						<li><a href="#fourth"
+						<li><a href="#boardList"
 							class="button primary color1 circle icon solid fa-angle-right">Next</a></li>
 					</ul>
 				</div>
 				<div class="image filtered tinted" data-position="top right">
 					<img src="images/tople.jpg" alt="" style="opacity: 0.3" />
+				</div>
+			</section>
+			
+			<section class="panel spotlight color0" id="boardList">
+				<div class="content span-5">
+					<h4 class="major">게시판</h4>
+					<div class="table-wrapper">
+						<table>
+							<thead>
+								<tr>
+									<th>작성자</th>
+									<th width="50%">제목</th>
+									<th>작성일자</th>
+								</tr>
+							</thead>
+							<tbody id="listzone">
+							</tbody>
+						</table>
+						<ul class="actions">
+							<li id="pre"><a href="#" class="button primary color2 circle icon solid fa-arrow-left">이전</a></li>
+							<li id="fw"><a href="#" class="button primary color2 circle icon solid fa-arrow-right">다음</a></li>
+							<li><a class="button primary color2" id="write" onclick="$('#writeField').toggle();">글쓰기</a></li>
+						</ul>
+					</div>
+				</div>
+			</section>
+			
+			<section class="panel spotlight color3" id="writeField">
+				<div class="content span-5">
+					<form method="post" id="boardForm">
+						<div class="fields">
+							<div class="field third">
+								<label for="author">작성자</label>
+								<input type="text" name="author" id="author" />
+							</div>
+							<div class="field third">
+								<label for="pass">비밀번호</label>
+								<input type="password" name="pass" id="pass" />
+							</div>
+							<div class="field">
+								<label for="subject">제목</label>
+								<input type="text" name="subject" id="subject">
+							</div>
+							<div class="field">
+								<label for="content">내용</label>
+								<textarea name="content" id="content" rows="4"></textarea>
+							</div>
+						</div>
+						<ul class="actions">
+							<li><input type="submit" value="작성" id="boardWrite" class="button primary" /></li>
+							<li><input type="reset" value="다시쓰기" class="button primary" /></li>
+						</ul>
+					</form>
 				</div>
 			</section>
 
@@ -177,7 +230,153 @@
 	<script src="assets/js/jquery.min.js"></script>
 	<script src="assets/js/browser.min.js"></script>
 	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 	<script src="assets/js/main.js"></script>
+	<script type="text/javascript">
+		var root = window.location.protocol + "//" 
+					+ window.location.hostname 
+					+ (window.location.port ? ':' + window.location.port: '')
+		var startCursor = null
+		var offset = 0;
+		
+		$(function() {
+			getList(true);
+			
+			$("#writeField").hide();
+			
+			$("#boardWrite").click(function() {
+				$.ajax({
+					type: "PUT",
+					url: root + "/board/write",
+					data: $("#boardForm").serialize(),
+					success: function(data) {
+						location.reload();
+					}
+				});
+				
+				return false;
+			});
+			
+			$("#pre").click(function() {
+				getList(false)
+				return false;
+			})
+			
+			$("#fw").click(function() {
+				getList(true)
+				return false;
+			})
+		})
+		
+		function getList(isNext) {
+			var listurl = root + "/board/list?isNext=" + isNext;
+			
+			if (isNext) {
+				if(startCursor) {
+					listurl += ("&startCursor=" + startCursor)
+				}
+			} else {
+				offset--;
+				if(offset > 0) {
+					listurl += ("&offset=" + offset)
+				}
+			}
+			
+			$.get(listurl, function(data){
+				$("#listzone").children().remove();
+				
+				if(data.list) {
+					for (let board of data.list) {
+						var tr = $("<tr id='"+board.boardId+"'>")
+						
+						var name = $("<td>" + board.author + "</td>");
+						var sub = $("<td>" + board.subject + "</td>");
+						var days = $("<td>" + board.monthDay + "</td>");
+						
+						tr.addClass("article")
+						
+						var content = $("<tr></tr>")
+						
+						var td1 = $("<td></td>");
+						td1.attr("colspan", 2);
+						td1.html("<span>"+board.content+"</span>");
+						
+						var td2 = $("<td></td>");
+						var act = $("<ul class='actions'><li></li></ul>")
+						var delbtn = $("<input type='button' value='글삭제' class='button primary color2 boardDel' />");
+						delbtn.attr("data", board.boardId)
+						delbtn.attr("pass", board.pass)
+						
+						td2.append(act.append(delbtn))
 
+						content.addClass("cont").hide()
+						
+						$("#listzone").append(tr.append(name, sub, days), content.append(td1, td2))
+					}
+				}
+			}).done(function(data){
+				if(isNext) offset++;
+				
+				if(data.endCursor) {
+					startCursor = data.endCursor;
+					$("#fw").show();
+				}
+				else {
+					startCursor = null;
+					$("#fw").hide();
+				}
+				
+				if (offset > 1) {
+					$("#pre").show();
+				}
+				else {
+					$("#pre").hide();
+				}
+				
+				$(".article").click(function() {
+					$(this).next(".cont").toggle()
+				})
+				
+				$(".boardDel").click(function() {
+					Swal.fire({
+						title: '삭제하시겠습니까?',
+						text: '비밀번호를 입력해 주세요.',
+						input: 'password',
+						inputPlaceholder: '삭제하려는 글의 비밀번호',
+						inputAttributes: {
+							autocapitalize: 'off',
+							autocorrect: 'off'
+						},
+						showCancelButton: true,
+						cancelButtonText: '<i class="far fa-window-close"></i>',
+						confirmButtonText: '<i class="far fa-trash-alt"></i>',
+					})
+					.then((result) => {
+						if($(this).attr("pass") !== result.value) {
+							Swal.fire("비밀번호가 일치하지 않습니다.", '', 'info')
+						} else {
+							var pass = result.value;
+							
+							$.ajax({
+								url: root + "/board",
+								method: "DELETE",
+								data: {
+									boardId: $(this).attr("data")
+								},
+								success: function(data) {
+									Swal.fire({
+										title: '삭제 성공',
+										icon: 'success',
+										confirmButtonText: '확인',
+										onAfterClose: function(){location.reload()}
+									})
+								}
+							})
+						}
+					})
+				})
+			})
+		}
+	</script>
 </body>
 </html>
