@@ -251,7 +251,7 @@
 			$("#boardWrite").click(function() {
 				$.ajax({
 					type: "PUT",
-					url: root + "/board/write",
+					url: root + "/board",
 					data: $("#boardForm").serialize(),
 					success: function(data) {
 						location.reload();
