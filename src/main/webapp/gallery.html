@@ -1,0 +1,137 @@
+
+<!DOCTYPE HTML>
+<!--
+	Ethereal by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+<title>Gallery - Ethereal by HTML5 UP</title>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no" />
+<link rel="stylesheet" href="assets/css/main.css" />
+<noscript>
+	<link rel="stylesheet" href="assets/css/noscript.css" />
+</noscript>
+</head>
+<body class="is-preload">
+
+	<!-- Page Wrapper -->
+	<div id="page-wrapper">
+
+		<!-- Wrapper -->
+		<div id="wrapper">
+			<!-- Panel -->
+			<section class="panel">
+				<div class="intro color2">
+					<h2 class="major">갤러리</h2>
+					<ul class="actions">
+						<li><a class="button primary color2" id="write">사진 등록</a></li>
+					</ul>
+				</div>
+
+				<div class="gallery" id="gallery"></div>
+			</section>
+
+			<!-- Copyright -->
+			<div class="copyright">
+				&copy; Untitled. Design: <a href="https://html5up.net">HTML5 UP</a>.
+			</div>
+		</div>
+
+	</div>
+
+	<!-- Scripts -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+	<script src="assets/js/main.js"></script>
+	<script type="text/javascript">
+			var root = window.location.protocol + "//" 
+			+ window.location.hostname 
+			+ (window.location.port ? ':' + window.location.port : '') + "/gallery"
+			
+				$(function() {
+					$("#gallery").hide()
+					
+					$.get({
+						url: root + "/list",
+						success: function(data) {
+							$("#gallery").children().remove();
+							for (var i = 0; i < data.length; i++) {
+								var safeurl = data[i];
+								
+								var a = $("<a class='image filtered span-2-4' data-position='top'></a>")
+								a.attr("href", safeurl)
+								
+								var img = $("<img alt='' />")
+								img.attr("src", safeurl + "=s500")
+								
+								a.append(img)
+								$("#gallery").append(a)
+							}
+							
+							if (data.length > 0) {
+								$("#gallery").show()
+							} else {
+								$("#gallery").hide()
+							}
+						}
+					})
+					
+					$("#write").click(function(){
+						(async () => {
+
+							const { value: files } = await Swal.fire({
+								title: 'Select image',
+								input: 'file',
+								inputAttributes: {
+									accept: 'image/*',
+									multiple: 'multiple'
+								},
+								inputValidator: (fi) => {
+									var totalsize = 0;
+									
+									for (var i = 0; i < fi.length; i++) {
+										var fisize = fi[i].size || fi[i].filesize
+										
+										if (fisize > 30000000) {
+											return "단일 파일 사이즈는 30MB를 넘을 수 없습니다."
+										} else {
+											totalsize += fisize
+										}
+									}
+									return totalsize > 300000000 ? "모든 파일의 합은 300MB를 넘을 수 업습니다." : false
+								}
+							})
+							
+							if (files) {
+								console.log(files);
+								
+								var fd = new FormData();
+									
+								for (var i = 0; i < files.length; i++) {
+									fd.append("files", files[i]);
+								}
+								
+								$.post({
+									url: root,
+									data: fd,
+									contentType: false,
+									processData: false,
+									success: function() {
+										Swal.fire("성공", "사진 등록 성공", "success")
+										.then(() => location.reload())
+									}
+								})
+								.fail(function() {Swal.fire("실패", "사진 등록 실패", "error")})
+							}
+						})()
+					})
+				})
+			</script>
+</body>
+</html>
