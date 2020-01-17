@@ -8,21 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import gq.jackg.example.dao.BoardDAO;
-import gq.jackg.example.model.Board;
+import gq.jackg.example.model.BoardDTO;
 
 @Service
 public class BoardService{
 	@Autowired BoardDAO dao;
 	
-	public Board getArticle(String boardId) {
+	public BoardDTO getArticle(String boardId) {
 		if (boardId == null) {
-			return new Board();
+			return new BoardDTO();
 		}
 		
 		return dao.readBoard(Long.parseLong(boardId));
 	}
 	
-	public Board writeArticle(Board board) {
+	public BoardDTO writeArticle(BoardDTO board) {
 		board = setTime(board);
 		
 		long boardId = dao.writeBoard(board);
@@ -30,7 +30,7 @@ public class BoardService{
 		return dao.readBoard(boardId);
 	}
 	
-	public Board updateArticle(Board board) {
+	public BoardDTO updateArticle(BoardDTO board) {
 		long boardId = dao.updateBoard(board);
 		
 		return dao.readBoard(boardId);
@@ -48,7 +48,7 @@ public class BoardService{
 		return dao.backWord(offset);
 	}
 	
-	private Board setTime(Board board) {
+	private BoardDTO setTime(BoardDTO board) {
 		String nowToString = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 		board.setMonthDay(nowToString);
 		return board;

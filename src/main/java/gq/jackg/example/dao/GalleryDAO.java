@@ -21,6 +21,8 @@ import com.google.appengine.tools.cloudstorage.ListOptions;
 import com.google.appengine.tools.cloudstorage.ListResult;
 import com.google.appengine.tools.cloudstorage.RetryParams;
 
+import gq.jackg.example.model.GalleryDTO;
+
 @Repository
 public class GalleryDAO {
 	private final static String NAME = "gallery";
@@ -35,16 +37,16 @@ public class GalleryDAO {
 														.totalRetryPeriodMillis(15000)
 														.build());
 	
-	public String getImg(String gsKey) {
-		String gsname = new String(Base64.decodeBase64(gsKey));
-		
+	public String getImg(String filename) {
 		ImagesService imgService = ImagesServiceFactory.getImagesService();
 		
-		return imgService.getServingUrl(ServingUrlOptions.Builder.withGoogleStorageFileName(gsname).secureUrl(true));
+		return imgService.getServingUrl(ServingUrlOptions.Builder
+											.withGoogleStorageFileName("/gs/" + bucketName + "/" + filename)
+											.secureUrl(false));
 	}
 	
 	public void uploadImg(MultipartFile file) {
-		String temp = NAME + "/" + System.currentTimeMillis() + file.getName();
+		String temp = NAME + "/" + System.currentTimeMillis() + file.getOriginalFilename();
 		
 		GcsFilename filename = new GcsFilename(bucketName, temp);
 		
@@ -57,7 +59,7 @@ public class GalleryDAO {
 		}
 	}
 	
-	public ArrayList<String> getList() {
+	public ArrayList<GalleryDTO> getList() {
 		ListResult results = null;
 		
 		try {
@@ -66,7 +68,7 @@ public class GalleryDAO {
 			e.printStackTrace();
 		}
 		
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<GalleryDTO> list = new ArrayList<GalleryDTO>();
 		
 		ImagesService imgService = ImagesServiceFactory.getImagesService();
 		
@@ -75,24 +77,20 @@ public class GalleryDAO {
 			
 			String url = imgService.getServingUrl(ServingUrlOptions.Builder
 										.withGoogleStorageFileName("/gs/" + bucketName + "/" + listItem.getName())
-										);
-			list.add(url);
+										.secureUrl(true));
+			list.add(new GalleryDTO(url, listItem.getName()));
 		}
 		
 		return list;
 	}
 	
-	public boolean deleteImg(String gsKey) {
-		String gsname = new String(Base64.decodeBase64(gsKey));
-		
-		String[] names = gsname.split("/");
-		
-		GcsFilename filename = new GcsFilename(bucketName, NAME + "/" + names[names.length - 1]);
+	public boolean deleteImg(String filename) {
+		GcsFilename gcsFilename = new GcsFilename(bucketName, filename);
 		
 		boolean result = false;
 		
 		try {
-			result = gcsService.delete(filename);
+			result = gcsService.delete(gcsFilename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

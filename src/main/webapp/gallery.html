@@ -62,12 +62,12 @@
 						success: function(data) {
 							$("#gallery").children().remove();
 							for (var i = 0; i < data.length; i++) {
-								var safeurl = data[i];
-								
+								var safeurl = data[i].imgUrl;
+								alert(data[i].filename)
 								var a = $("<a class='image filtered span-2-4' data-position='top'></a>")
 								a.attr("href", safeurl)
 								
-								var img = $("<img alt='' />")
+								var img = $("<img alt='" + data[i].filename + "' />")
 								img.attr("src", safeurl + "=s500")
 								
 								a.append(img)

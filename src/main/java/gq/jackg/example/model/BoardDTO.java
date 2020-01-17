@@ -2,7 +2,7 @@ package gq.jackg.example.model;
 
 import java.io.Serializable;
 
-public class Board implements Serializable {
+public class BoardDTO implements Serializable {
 	private long boardId;
 	private String author;
 	private String subject;
@@ -13,9 +13,9 @@ public class Board implements Serializable {
 	public static final String BOARD_ID = "BoardId", AUTHOR = "Author", SUBJECT = "Subject", 
 							   CONTENT = "Content", PASS = "Pass", DATE = "Date";
 	
-	public Board() {}
+	public BoardDTO() {}
 
-	public Board(long boardId, String author, String subject, String content, String pass, String monthDay) {
+	public BoardDTO(long boardId, String author, String subject, String content, String pass, String monthDay) {
 		super();
 		this.boardId = boardId;
 		this.author = author;

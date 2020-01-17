@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import gq.jackg.example.model.Board;
+import gq.jackg.example.model.BoardDTO;
 import gq.jackg.example.web.services.BoardService;
 
 @RestController("/board")
@@ -18,7 +18,7 @@ public class BoardController {
 	@Autowired BoardService boardService;
 	
 	@GetMapping("/board")
-	public Board getBoard(@RequestParam(name = "boardId", required = false) String boardId) {
+	public BoardDTO getBoard(@RequestParam(name = "boardId", required = false) String boardId) {
 		return boardService.getArticle(boardId);
 	}
 	
@@ -36,12 +36,12 @@ public class BoardController {
 	}
 	
 	@PutMapping("/board")
-	public Board writeBoard(Board board) {
+	public BoardDTO writeBoard(BoardDTO board) {
 		return boardService.writeArticle(board);
 	}
 	
 	@PostMapping("/board")
-	public Board updateBoard(Board board) {
+	public BoardDTO updateBoard(BoardDTO board) {
 		return boardService.updateArticle(board);
 	}
 	

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import gq.jackg.example.model.GalleryDTO;
 import gq.jackg.example.web.services.GalleryService;
 
 @RestController("/gallery")
@@ -21,13 +22,13 @@ public class GalleryController {
 	@Autowired GalleryService service;
 	
 	@GetMapping("/gallery/list")
-	public ArrayList<String> getList() {
+	public ArrayList<GalleryDTO> getList() {
 		return service.getList();
 	}
 	
 	@GetMapping("/gallery")
-	public String getItem(@RequestParam(name = "gsKey", required = true) String gsKey) {
-		return service.geturl(gsKey);
+	public String getItem(@RequestParam(name = "filename", required = true) String filename) {
+		return service.geturl(filename);
 	}
 	
 	@PostMapping("/gallery")
@@ -36,12 +37,12 @@ public class GalleryController {
 	}
 	
 	@DeleteMapping("/gallery")
-	public void delete(@RequestParam(name = "gsKey", required = true) String gsKey
+	public void delete(@RequestParam(name = "filename", required = true) String filename
 					   , @RequestParam(name = "pass", required = true) String pass
 							, HttpServletResponse res) {
 		
 		if (pass != null && pass.equals("12345")) {
-			if (!service.delete(gsKey)) {
+			if (!service.delete(filename)) {
 				try {
 					res.sendError(HttpStatus.SC_BAD_REQUEST, "삭제 실패");
 				} catch (IOException e) {

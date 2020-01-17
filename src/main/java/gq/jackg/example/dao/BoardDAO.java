@@ -22,7 +22,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.QueryResultList;
 
-import gq.jackg.example.model.Board;
+import gq.jackg.example.model.BoardDTO;
 
 @Repository
 public class BoardDAO {
@@ -33,17 +33,17 @@ public class BoardDAO {
 		this.datastore = DatastoreServiceFactory.getAsyncDatastoreService();
 	}
 
-	public Board entityToBoard(Entity entity) {
-		return new Board(entity.getKey().getId(), 
-				(String) entity.getProperty(Board.AUTHOR),
-				(String) entity.getProperty(Board.SUBJECT), 
-				(String) entity.getProperty(Board.CONTENT),
-				(String) entity.getProperty(Board.PASS), 
-				(String) entity.getProperty(Board.DATE));
+	public BoardDTO entityToBoard(Entity entity) {
+		return new BoardDTO(entity.getKey().getId(), 
+				(String) entity.getProperty(BoardDTO.AUTHOR),
+				(String) entity.getProperty(BoardDTO.SUBJECT), 
+				(String) entity.getProperty(BoardDTO.CONTENT),
+				(String) entity.getProperty(BoardDTO.PASS), 
+				(String) entity.getProperty(BoardDTO.DATE));
 	}
 
-	public List<Board> entitiesToBoard(Iterator<Entity> entities) {
-		List<Board> list = new ArrayList<Board>();
+	public List<BoardDTO> entitiesToBoard(Iterator<Entity> entities) {
+		List<BoardDTO> list = new ArrayList<BoardDTO>();
 
 		while (entities.hasNext()) {
 			Entity entity = (Entity) entities.next();
@@ -54,7 +54,7 @@ public class BoardDAO {
 		return list;
 	}
 
-	public long writeBoard(Board board) {
+	public long writeBoard(BoardDTO board) {
 		Entity entity = new Entity(BOARD_KIND);
 
 		Key key = null;
@@ -69,12 +69,12 @@ public class BoardDAO {
 		}
 		
 		Entity setId = new Entity(key);
-		setId.setProperty(Board.BOARD_ID, key.getId());
-		setId.setProperty(Board.AUTHOR, board.getAuthor());
-		setId.setProperty(Board.SUBJECT, board.getSubject());
-		setId.setProperty(Board.CONTENT, board.getContent());
-		setId.setProperty(Board.PASS, board.getPass());
-		setId.setProperty(Board.DATE, board.getMonthDay());
+		setId.setProperty(BoardDTO.BOARD_ID, key.getId());
+		setId.setProperty(BoardDTO.AUTHOR, board.getAuthor());
+		setId.setProperty(BoardDTO.SUBJECT, board.getSubject());
+		setId.setProperty(BoardDTO.CONTENT, board.getContent());
+		setId.setProperty(BoardDTO.PASS, board.getPass());
+		setId.setProperty(BoardDTO.DATE, board.getMonthDay());
 		
 		// 비동기식
 		Future<Key> fKey = datastore.put(setId);
@@ -90,16 +90,16 @@ public class BoardDAO {
 		return key.getId();
 	}
 
-	public long updateBoard(Board board) {
+	public long updateBoard(BoardDTO board) {
 		Key key = KeyFactory.createKey(BOARD_KIND, board.getBoardId());
 
 		Entity entity = new Entity(key);
 
-		entity.setProperty(Board.AUTHOR, board.getAuthor());
-		entity.setProperty(Board.SUBJECT, board.getSubject());
-		entity.setProperty(Board.CONTENT, board.getContent());
-		entity.setProperty(Board.PASS, board.getPass());
-		entity.setProperty(Board.DATE, board.getMonthDay());
+		entity.setProperty(BoardDTO.AUTHOR, board.getAuthor());
+		entity.setProperty(BoardDTO.SUBJECT, board.getSubject());
+		entity.setProperty(BoardDTO.CONTENT, board.getContent());
+		entity.setProperty(BoardDTO.PASS, board.getPass());
+		entity.setProperty(BoardDTO.DATE, board.getMonthDay());
 
 		try {
 			key = datastore.put(entity).get();
@@ -118,7 +118,7 @@ public class BoardDAO {
 		datastore.delete(key);
 	}
 
-	public Board readBoard(long boardId) {
+	public BoardDTO readBoard(long boardId) {
 		Future<Entity> fEn = datastore.get(KeyFactory.createKey(BOARD_KIND, boardId));
 		
 		Entity board = null;
@@ -142,12 +142,12 @@ public class BoardDAO {
 			options.startCursor(Cursor.fromWebSafeString(startCursor));
 		}
 		
-		Query query = new Query(BOARD_KIND).addSort(Board.DATE, SortDirection.DESCENDING);
+		Query query = new Query(BOARD_KIND).addSort(BoardDTO.DATE, SortDirection.DESCENDING);
 		PreparedQuery psq = datastore.prepare(query);
 		
 		QueryResultList<Entity> qrl = psq.asQueryResultList(options);
 		
-		List<Board> list = entitiesToBoard(qrl.iterator());
+		List<BoardDTO> list = entitiesToBoard(qrl.iterator());
 		Cursor cursor = qrl.getCursor();
 		
 		if (cursor != null && list.size() == 5) {
@@ -167,12 +167,12 @@ public class BoardDAO {
 		FetchOptions options = FetchOptions.Builder.withLimit(PAGE_SIZE);
 		options.offset(PAGE_SIZE * offset);
 		
-		Query query = new Query(BOARD_KIND).addSort(Board.DATE, SortDirection.DESCENDING);
+		Query query = new Query(BOARD_KIND).addSort(BoardDTO.DATE, SortDirection.DESCENDING);
 		PreparedQuery psq = datastore.prepare(query);
 		
 		QueryResultList<Entity> qrl = psq.asQueryResultList(options);
 		
-		List<Board> list = entitiesToBoard(qrl.iterator());
+		List<BoardDTO> list = entitiesToBoard(qrl.iterator());
 		
 		Cursor cursor = qrl.getCursor();
 		
