@@ -1,4 +1,4 @@
-package gq.jackg.example.boardDAO;
+package gq.jackg.example.dao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
