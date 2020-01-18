@@ -23,6 +23,7 @@
 
 		<!-- Wrapper -->
 		<div id="wrapper">
+		
 			<!-- Panel -->
 			<section class="panel">
 				<div class="intro color2">
@@ -39,6 +40,7 @@
 			<div class="copyright">
 				&copy; Untitled. Design: <a href="https://html5up.net">HTML5 UP</a>.
 			</div>
+			
 		</div>
 
 	</div>
@@ -61,14 +63,19 @@
 						url: root + "/list",
 						success: function(data) {
 							$("#gallery").children().remove();
+							
 							for (var i = 0; i < data.length; i++) {
 								var safeurl = data[i].imgUrl;
 								
-								var a = $("<a class='image filtered span-2-4' data-position='top'></a>")
+								var a = $("<a></a>")
 								a.attr("href", safeurl)
+								a.addClass("image")
+								a.addClass("filtered")
+								a.addClass("span-2-5")
 								
 								var img = $("<img alt='" + data[i].filename + "' />")
 								img.attr("src", safeurl + "=s500")
+								img.attr("style", "width:100%;height:100%;")
 								
 								a.append(img)
 								$("#gallery").append(a)
